@@ -8,23 +8,31 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-public class Category {
+public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long categoryId;
+    private Long productId;
 
     @NotBlank
-    @Size(min = 2)
-    private String categoryName;
+    @Size(min = 3)
+    private String productName;
+    private String image;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
-    private List<Product> products;
+    @NotBlank
+    @Size(min = 3)
+    private String description;
+    private Integer quantity;
+    private double price;
+    private double discount;
+    private double specialPrice;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
 }

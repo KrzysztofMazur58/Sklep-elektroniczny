@@ -93,7 +93,7 @@ public class CategoryService implements CategoryServiceInterface{
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "categoryId", categoryId));
 
         Category category = modelMapper.map(categoryDTO, Category.class);
-        category.setId(categoryId);
+        category.setCategoryId(categoryId);
         existingCategory = categoryRepository.save(category);
         return modelMapper.map(existingCategory, CategoryDTO.class);
     }
