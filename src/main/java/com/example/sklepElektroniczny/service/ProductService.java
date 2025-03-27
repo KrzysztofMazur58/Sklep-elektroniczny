@@ -90,6 +90,7 @@ public class ProductService implements ProductServiceInterface{
         productResponse.setTotalElements(page.getTotalElements());
         productResponse.setTotalPages(page.getTotalPages());
         productResponse.setLastPage(page.isLast());
+
         return productResponse;
     }
 
