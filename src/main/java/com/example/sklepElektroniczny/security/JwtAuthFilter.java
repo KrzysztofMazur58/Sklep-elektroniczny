@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -23,7 +22,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private JwtTokenUtil jwtTokenUtil;
 
     @Autowired
-    private UserDetailsService customUserDetailsService;
+    private CustomUserDetailsService customUserDetailsService;
 
     private static final Logger logFilter = LoggerFactory.getLogger(JwtAuthFilter.class);
 
@@ -33,8 +32,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         logFilter.debug("JwtAuthFilter triggered for URI: {}", httpRequest.getRequestURI());
         try {
             String token = extractJwt(httpRequest);
-            if (token != null && jwtTokenUtil.isTokenValid(token)) {
-                String extractedUsername = jwtTokenUtil.extractUsernameFromToken(token);
+            if (token != null && jwtTokenUtil. validateJwtToken(token)) {
+                String extractedUsername = jwtTokenUtil.getUserNameFromJwtToken(token);
 
                 UserDetails loadedUser = customUserDetailsService.loadUserByUsername(extractedUsername);
 
@@ -56,7 +55,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     private String extractJwt(HttpServletRequest httpRequest) {
-        String extractedToken = jwtTokenUtil.extractJwtFromHeader(httpRequest);
+        String extractedToken = jwtTokenUtil.getJwtFromCookies(httpRequest);
         logFilter.debug("JwtAuthFilter.java: Extracted Token: {}", extractedToken);
         return extractedToken;
     }
