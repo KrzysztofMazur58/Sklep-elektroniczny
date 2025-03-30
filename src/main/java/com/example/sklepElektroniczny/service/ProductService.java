@@ -95,6 +95,14 @@ public class ProductService implements ProductServiceInterface{
     }
 
     @Override
+    public ProductDTO getProductById(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
+        return modelMapper.map(product, ProductDTO.class);  // Konwersja z entity na DTO
+    }
+
+
+    @Override
     public ProductResponse searchByCategory(Long categoryId, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
 
         Category category = categoryRepository.findById(categoryId)
