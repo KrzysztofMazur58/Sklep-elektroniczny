@@ -2,6 +2,7 @@ package com.example.sklepElektroniczny.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.w3c.dom.stylesheets.LinkStyle;
@@ -29,16 +30,16 @@ public class Address {
     @Size(min = 3)
     private String street;
 
-    @NotBlank
+    @NotNull
     private Integer number;
 
     @NotBlank
-    @Size(min = 6)
+    @Size(min = 5)
     private String pincode;
 
-    @ToString.Exclude
-    @ManyToMany(mappedBy = "addresses")
-    private List<User> users = new ArrayList<>();
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     public Address(String city, String street, Integer number, String pincode) {
         this.city = city;
