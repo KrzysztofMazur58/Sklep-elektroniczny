@@ -9,7 +9,7 @@ version = '0.0.1-SNAPSHOT'
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)  // Zostawiamy wersję 21
+		languageVersion = JavaLanguageVersion.of(21)
 	}
 }
 
@@ -24,21 +24,35 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	// Spring Boot Dependencies
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'io.jsonwebtoken:jjwt:0.12.3'
-	implementation group: 'org.modelmapper', name: 'modelmapper', version: '2.1.1'
-	compileOnly 'org.projectlombok:lombok'
+	implementation 'org.modelmapper:modelmapper:2.1.1'
 	runtimeOnly 'org.postgresql:postgresql'
+
+	// Lombok (for simplicity in writing code)
+	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.security:spring-security-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testCompileOnly 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
+
+	// Testing dependencies (JUnit, MockMvc, etc.)
+	testImplementation 'org.springframework.boot:spring-boot-starter-test' // includes MockMvc, JUnit, AssertJ, etc.
+	testImplementation 'org.springframework.security:spring-security-test' // for testing Spring Security
+	testImplementation 'com.fasterxml.jackson.core:jackson-databind' // For JSON parsing in tests
+	testImplementation 'org.mockito:mockito-core' // Mockito for mocking dependencies if needed
+	testImplementation 'org.mockito:mockito-junit-jupiter' // Mockito with JUnit Jupiter support
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher' // JUnit Platform Launcher for JUnit 5
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+	useJUnitPlatform() // Use JUnit 5
 }
+
+
+
+
 

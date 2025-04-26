@@ -12,11 +12,12 @@ import com.example.sklepElektroniczny.repository.CartRepository;
 import com.example.sklepElektroniczny.repository.CategoryRepository;
 import com.example.sklepElektroniczny.repository.ProductRepository;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -36,6 +37,9 @@ public class ProductService implements ProductServiceInterface{
     private final CartRepository cartRepository;
     private final CartService cartService;
     private final ModelMapper modelMapper;
+
+    @Value("${image.base.url}")
+    private String imageBaseUrl;
 
     public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository, CartRepository cartRepository, CartService cartService, ModelMapper modelMapper) {
         this.productRepository = productRepository;
@@ -76,18 +80,34 @@ public class ProductService implements ProductServiceInterface{
     }
 
     @Override
-    public ProductResponse getAllProducts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+    public ProductResponse getAllProducts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder, String keyword, String category) {
         Sort sort = sortOrder.equalsIgnoreCase("asc")
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
-        Page<Product> page = productRepository.findAll(pageable);
+        Specification<Product> specification = Specification.where(null);
+
+        if(keyword != null && !keyword.isEmpty()){
+            specification = specification.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("productName")), "%" + keyword.toLowerCase() + "%"));
+        }
+
+        if(category != null && !category.isEmpty()){
+            specification = specification.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.like(root.get("category").get("categoryName"), category));
+        }
+
+        Page<Product> page = productRepository.findAll(specification, pageable);
 
         List<Product> products = page.getContent();
 
         List<ProductDTO> productDTOS = products.stream()
-                .map(product -> modelMapper.map(product, ProductDTO.class))
+                .map(product -> {
+                    ProductDTO productDTO = modelMapper.map(product, ProductDTO.class);
+                    productDTO.setImage(createUrlForImage(product.getImage()));
+                    return productDTO;
+                })
                 .toList();
 
         ProductResponse productResponse = new ProductResponse();
@@ -105,9 +125,12 @@ public class ProductService implements ProductServiceInterface{
     public ProductDTO getProductById(Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
-        return modelMapper.map(product, ProductDTO.class);  // Konwersja z entity na DTO
+        return modelMapper.map(product, ProductDTO.class);
     }
 
+    private String createUrlForImage(String name){
+        return imageBaseUrl.endsWith("/") ? imageBaseUrl + name : imageBaseUrl + "/" + name;
+    }
 
     @Override
     public ProductResponse searchByCategory(Long categoryId, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
