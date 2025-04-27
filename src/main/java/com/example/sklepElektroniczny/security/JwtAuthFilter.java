@@ -18,6 +18,7 @@ import java.io.IOException;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
+
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
 
@@ -29,18 +30,29 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain chain)
             throws ServletException, IOException {
-        logFilter.debug("JwtAuthFilter triggered for URI: {}", httpRequest.getRequestURI());
+
+        String path = httpRequest.getRequestURI();
+
+        if (path.startsWith("/swagger-ui") || path.startsWith("/v3/api-docs") || path.startsWith("/swagger-resources") || path.startsWith("/webjars") || path.startsWith("/api/docs")) {
+            chain.doFilter(httpRequest, httpResponse);
+            return;
+        }
+
+        logFilter.debug("JwtAuthFilter triggered for URI: {}", path);
+
         try {
             String token = extractJwt(httpRequest);
-            if (token != null && jwtTokenUtil. validateJwtToken(token)) {
+            if (token != null && jwtTokenUtil.validateJwtToken(token)) {
                 String extractedUsername = jwtTokenUtil.getUserNameFromJwtToken(token);
 
                 UserDetails loadedUser = customUserDetailsService.loadUserByUsername(extractedUsername);
 
                 UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(loadedUser,
+                        new UsernamePasswordAuthenticationToken(
+                                loadedUser,
                                 null,
                                 loadedUser.getAuthorities());
+
                 logFilter.debug("Extracted roles from JWT: {}", loadedUser.getAuthorities());
 
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpRequest));
@@ -48,7 +60,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         } catch (Exception ex) {
-            logFilter.error("Failed to set user authentication: {}", ex);
+            logFilter.error("Failed to set user authentication: {}", ex.getMessage());
         }
 
         chain.doFilter(httpRequest, httpResponse);
@@ -56,8 +68,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private String extractJwt(HttpServletRequest httpRequest) {
         String extractedToken = jwtTokenUtil.getJwtFromCookies(httpRequest);
-        logFilter.debug("JwtAuthFilter.java: Extracted Token: {}", extractedToken);
+        logFilter.debug("JwtAuthFilter: Extracted Token: {}", extractedToken);
         return extractedToken;
     }
 }
+
 

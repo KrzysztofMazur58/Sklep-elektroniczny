@@ -14,7 +14,6 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -48,10 +47,8 @@ public class SecurityConfig {
     @Bean
     public DaoAuthenticationProvider daoAuthenticationProvider() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-
         authenticationProvider.setUserDetailsService(customUserDetailsService);
         authenticationProvider.setPasswordEncoder(passwordEncoder());
-
         return authenticationProvider;
     }
 
@@ -73,22 +70,27 @@ public class SecurityConfig {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
-                        auth.requestMatchers("/api/auth/**").permitAll()
-                                .requestMatchers("/v3/api-docs/**").permitAll()
-                                .requestMatchers("/api/admin/**").permitAll()
-                                .requestMatchers("/api/public/**").permitAll()
-                                .requestMatchers("/swagger-ui/**").permitAll()
-                                .requestMatchers("/api/test/**").permitAll()
-                                .requestMatchers("/images/**").permitAll()
-                                .anyRequest().authenticated()
+                        auth.requestMatchers(
+                                        "/api/auth/**",
+                                        "/api/public/**",
+                                        "/swagger-ui/**",
+                                        "/swagger-ui.html",
+                                        "/swagger-resources/**",
+                                        "/v3/api-docs/**",  // Pozwól na dostęp do definicji API
+                                        "/configuration/ui",
+                                        "/configuration/security",
+                                        "/webjars/**",
+                                        "/api/docs"
+                                ).permitAll()  // Daj dostęp do Swaggera
+                                .anyRequest().authenticated() // Wszystkie inne żądania wymagają autoryzacji
                 );
 
         http.authenticationProvider(daoAuthenticationProvider());
-
         http.addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -105,20 +107,9 @@ public class SecurityConfig {
     }
 
     @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web -> web.ignoring().requestMatchers("/v2/api-docs",
-                "/configuration/ui",
-                "/swagger-resources/**",
-                "/configuration/security",
-                "/swagger-ui.html",
-                "/webjars/**"));
-    }
-
-    @Bean
     public CommandLineRunner initData(RoleRepository roleRepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
         return args -> {
             try {
-
                 Role userRole = roleRepository.findByRoleName(AppRole.ROLE_USER)
                         .orElseGet(() -> roleRepository.saveAndFlush(new Role(AppRole.ROLE_USER)));
 
@@ -134,7 +125,7 @@ public class SecurityConfig {
 
                 if (!userRepository.existsByUserName("user1")) {
                     User user1 = new User("user1", "user1@example.com", passwordEncoder.encode("password1"));
-                    user1 = userRepository.saveAndFlush(user1); // Zapisz użytkownika przed przypisaniem roli
+                    user1 = userRepository.saveAndFlush(user1);
                     user1.setRoles(userRoles);
                     userRepository.saveAndFlush(user1);
                 }
@@ -159,8 +150,4 @@ public class SecurityConfig {
             }
         };
     }
-
-
 }
-
-

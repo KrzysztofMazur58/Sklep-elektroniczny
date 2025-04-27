@@ -31,6 +31,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'io.jsonwebtoken:jjwt:0.12.3'
 	implementation 'org.modelmapper:modelmapper:2.1.1'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6'
+
 	runtimeOnly 'org.postgresql:postgresql'
 
 	// Lombok (for simplicity in writing code)

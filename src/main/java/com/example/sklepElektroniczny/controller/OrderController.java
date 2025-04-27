@@ -4,6 +4,10 @@ import com.example.sklepElektroniczny.dtos.OrderDTO;
 import com.example.sklepElektroniczny.dtos.OrderRequestDTO;
 import com.example.sklepElektroniczny.service.OrderService;
 import com.example.sklepElektroniczny.util.AuthUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,8 +24,13 @@ public class OrderController {
         this.authUtil = authUtil;
     }
 
+    @Operation(summary = "Złóż zamówienie")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Zamówienie zostało utworzone pomyślnie"),
+            @ApiResponse(responseCode = "400", description = "Nieprawidłowe dane wejściowe")
+    })
     @PostMapping("/order/users/payments/{paymentMethod}")
-    public ResponseEntity<OrderDTO> order(@PathVariable String paymentMethod, @RequestBody OrderRequestDTO orderRequestDTO) {
+    public ResponseEntity<OrderDTO> order(@Parameter(description = "Metoda płatności", example = "paypal") @PathVariable String paymentMethod, @RequestBody OrderRequestDTO orderRequestDTO) {
         String emailId = authUtil.getCurrentUserEmail();
         OrderDTO order = orderService.createOrder(
                 emailId,
