@@ -103,7 +103,7 @@ public class CategoryControllerTest {
     public void testCreateCategory_ValidationError() throws Exception {
         mockMvc.perform(post("/api/public/categories")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"categoryName\":\"\"}")) // pusty string
+                        .content("{\"categoryName\":\"\"}"))
                 .andExpect(status().isUnprocessableEntity());
     }
 
