@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -50,7 +49,7 @@ public class AuthController {
         this.encoder = encoder;
     }
 
-    @Operation(summary = "Sign in user", description = "Authenticates the user and returns JWT cookie.")
+    @Operation(summary = "Sign in user", description = "Authenticates the user and returns JWT token and cookie.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User authenticated successfully"),
             @ApiResponse(responseCode = "404", description = "Bad credentials")
@@ -65,23 +64,36 @@ public class AuthController {
             Map<String, Object> map = new HashMap<>();
             map.put("message", "Bad credentials");
             map.put("status", false);
-            return new ResponseEntity<Object>(map, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(map, HttpStatus.NOT_FOUND);
         }
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
-        ResponseCookie jwtCookie = jwtTokenUtil.generateJwtCookie(userDetails);
+        // Generate token
+        String token = jwtTokenUtil.generateTokenFromUsername(userDetails.getUsername());
+
+        // Set cookie (optional)
+        ResponseCookie jwtCookie = ResponseCookie.from("jwtToken", token)
+                .path("/api")
+                .maxAge(24 * 60 * 60)
+                .httpOnly(false)
+                .build();
 
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(item -> item.getAuthority())
                 .collect(Collectors.toList());
 
-        UserInfoResponse response = new UserInfoResponse(userDetails.getId(), userDetails.getUsername(), roles);
+        // Include JWT token in response body
+        UserInfoResponse response = new UserInfoResponse(
+                userDetails.getId(),
+                userDetails.getUsername(),
+                roles,
+                token
+        );
 
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,
-                        jwtCookie.toString())
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                 .body(response);
     }
 
@@ -118,18 +130,16 @@ public class AuthController {
                         Role adminRole = roleRepository.findByRoleName(AppRole.ROLE_ADMIN)
                                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
                         roles.add(adminRole);
-
                         break;
                     case "worker":
-                        Role modRole = roleRepository.findByRoleName(AppRole.ROLE_WORKER)
+                        Role workerRole = roleRepository.findByRoleName(AppRole.ROLE_WORKER)
                                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(modRole);
-
+                        roles.add(workerRole);
                         break;
                     default:
-                        Role userRole = roleRepository.findByRoleName(AppRole.ROLE_USER)
+                        Role defaultRole = roleRepository.findByRoleName(AppRole.ROLE_USER)
                                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(userRole);
+                        roles.add(defaultRole);
                 }
             });
         }
@@ -140,47 +150,39 @@ public class AuthController {
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
-    @Operation(summary = "Get current username", description = "Returns the username of the currently authenticated user.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Username returned")
-    })
     @GetMapping("/username")
-    public String currentUserName(Authentication authentication){
-        if (authentication != null)
-            return authentication.getName();
-        else
-            return "";
+    public String currentUserName(Authentication authentication) {
+        return authentication != null ? authentication.getName() : "";
     }
 
-    @Operation(summary = "Get current user details", description = "Returns detailed information about the currently authenticated user.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User details returned")
-    })
     @GetMapping("/user")
-    public ResponseEntity<?> getUserDetails(Authentication authentication){
+    public ResponseEntity<?> getUserDetails(Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(item -> item.getAuthority())
                 .collect(Collectors.toList());
 
-        UserInfoResponse response = new UserInfoResponse(userDetails.getId(),
-                userDetails.getUsername(), roles);
+        String token = jwtTokenUtil.generateTokenFromUsername(userDetails.getUsername());
+
+        UserInfoResponse response = new UserInfoResponse(
+                userDetails.getId(),
+                userDetails.getUsername(),
+                roles,
+                token
+        );
 
         return ResponseEntity.ok().body(response);
     }
 
-    @Operation(summary = "Sign out user", description = "Clears the JWT cookie and signs the user out.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User signed out successfully")
-    })
     @PostMapping("/signout")
-    public ResponseEntity<?> signoutUser(){
+    public ResponseEntity<?> signoutUser() {
         ResponseCookie cookie = jwtTokenUtil.clearCookie();
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,
-                cookie.toString())
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(new MessageResponse("You have been signed out"));
     }
 }
+
 
 

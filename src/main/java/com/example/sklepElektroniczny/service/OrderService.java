@@ -10,9 +10,12 @@ import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService implements OrderServiceInterface {
@@ -68,7 +71,7 @@ public class OrderService implements OrderServiceInterface {
         Order newOrder = new Order();
         newOrder.setEmail(emailId);
         newOrder.setOrderDate(LocalDate.now());
-        newOrder.setTotalPrice(userCart.getTotalPrice());
+        newOrder.setTotalPrice(BigDecimal.valueOf(userCart.getTotalPrice()).setScale(2, RoundingMode.HALF_UP));
         newOrder.setStatus("Order accepted");
         newOrder.setAddress(address);
 
@@ -113,6 +116,43 @@ public class OrderService implements OrderServiceInterface {
 
         return result;
     }
+
+    @Override
+    public List<OrderDTO> getOrdersByEmail(String email) {
+        List<Order> orders = orderRepo.findByEmail(email);
+        return orders.stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<OrderDTO> getAllOrders() {
+        List<Order> orders = orderRepo.findAll();
+        return orders.stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    private OrderDTO mapToDTO(Order order) {
+        OrderDTO dto = mapper.map(order, OrderDTO.class);
+
+        if (order.getOrderElements() != null) {
+            dto.setOrderElements(order.getOrderElements().stream()
+                    .map(oe -> mapper.map(oe, OrderElementDTO.class))
+                    .collect(Collectors.toList()));
+        }
+
+        return dto;
+    }
+
+    @Transactional
+    public void updateOrderStatus(Long orderId, String newStatus) {
+        Order order = orderRepo.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order", "orderId", orderId));
+        order.setStatus(newStatus);
+        orderRepo.save(order);
+    }
+
 }
 
 

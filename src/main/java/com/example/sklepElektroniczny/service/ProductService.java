@@ -236,10 +236,16 @@ public class ProductService implements ProductServiceInterface{
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "productId", productId));
 
         List<Cart> carts = cartRepository.findCartsByProductId(productId);
-        carts.forEach(cart -> cartService.deleteProductFromCart(cart.getCartId(), productId));
+
+        if (!carts.isEmpty()) {
+
+            throw new APIException("Nie można usunąć produktu, ponieważ jest on obecny w jednym lub więcej koszykach.");
+        }
+
         productRepository.delete(product);
         return modelMapper.map(product, ProductDTO.class);
     }
+
 
     @Override
     public ProductDTO updateProductImage(Long productId, MultipartFile imageFile) throws IOException {

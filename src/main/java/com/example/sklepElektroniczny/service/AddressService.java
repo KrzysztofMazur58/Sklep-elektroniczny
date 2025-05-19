@@ -68,13 +68,14 @@ public class AddressService implements AddressServiceInterface{
 
     @Override
     public List<AddressDTO> getUserAddresses(User user) {
-        List<Address> addresses = user.getAddresses();
+        List<Address> addresses = Optional.ofNullable(user.getAddresses())
+                .orElse(List.of());
 
-        List<AddressDTO> addressDTOS = addresses.stream().map(address -> mapper.map(address, AddressDTO.class))
+        return addresses.stream()
+                .map(address -> mapper.map(address, AddressDTO.class))
                 .collect(Collectors.toList());
-
-        return addressDTOS;
     }
+
 
     @Override
     public AddressDTO updateAddressById(Long addressId, AddressDTO addressDTO) {

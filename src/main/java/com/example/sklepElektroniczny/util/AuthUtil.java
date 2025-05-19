@@ -36,5 +36,19 @@ public class AuthUtil {
         return userRepo.findByUserName(auth.getName())
                 .orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + auth.getName()));
     }
+
+    public boolean isCurrentUserAdmin() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return auth.getAuthorities().stream()
+                .anyMatch(role -> role.getAuthority().equals("ROLE_ADMIN"));
+    }
+
+    public boolean isCurrentUserWorker() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return auth.getAuthorities().stream()
+                .anyMatch(role -> role.getAuthority().equals("ROLE_WORKER"));
+    }
+
+
 }
 
