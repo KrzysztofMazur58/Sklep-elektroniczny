@@ -8,6 +8,7 @@ import com.example.sklepElektroniczny.entity.Product;
 import com.example.sklepElektroniczny.entity.Cart;
 import com.example.sklepElektroniczny.exceptions.APIException;
 import com.example.sklepElektroniczny.exceptions.ResourceNotFoundException;
+import com.example.sklepElektroniczny.rabbitmq.MessageProducer;
 import com.example.sklepElektroniczny.repository.CartRepository;
 import com.example.sklepElektroniczny.repository.CategoryRepository;
 import com.example.sklepElektroniczny.repository.ProductRepository;
@@ -37,17 +38,25 @@ public class ProductService implements ProductServiceInterface{
     private final CartRepository cartRepository;
     private final CartService cartService;
     private final ModelMapper modelMapper;
+    private final MessageProducer messageProducer;
 
     @Value("${image.base.url}")
     private String imageBaseUrl;
 
-    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository, CartRepository cartRepository, CartService cartService, ModelMapper modelMapper) {
+    public ProductService(ProductRepository productRepository,
+                          CategoryRepository categoryRepository,
+                          CartRepository cartRepository,
+                          CartService cartService,
+                          ModelMapper modelMapper,
+                          MessageProducer messageProducer) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.cartRepository = cartRepository;
         this.cartService = cartService;
         this.modelMapper = modelMapper;
+        this.messageProducer = messageProducer;
     }
+
 
     @Override
     public ProductDTO addProduct(Long categoryId, ProductDTO productDTO) {
@@ -72,6 +81,9 @@ public class ProductService implements ProductServiceInterface{
             double specialPrice = product.getPrice() - ((product.getDiscount() * 0.01) * product.getPrice());
             product.setSpecialPrice(specialPrice);
             Product savedProduct = productRepository.save(product);
+
+            String message = "Dodano produkt: " + savedProduct.getProductName();
+            messageProducer.sendProductCreatedMessage(message);
 
             return modelMapper.map(savedProduct, ProductDTO.class);
         } else {
