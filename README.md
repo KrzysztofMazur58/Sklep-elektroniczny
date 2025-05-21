@@ -22,4 +22,47 @@ The system is divided into two separate modules:
 
 This project is suitable as a foundation for a production-level e-commerce platform and demonstrates the integration of modern web technologies in a modular, scalable architecture.
 
+Architecture schema:
 ![image](https://github.com/user-attachments/assets/48ab2a4e-13e7-4455-a6e9-98775885f411)
+
+## 🚀 How to Run the Project
+
+This project consists of two main parts:
+- **Backend**: Spring Boot application using Gradle and PostgreSQL
+- **Frontend**: React application using Vite
+
+---
+
+### 🖥️ Backend (Spring Boot + Gradle)
+
+1. **Install dependencies**  
+   Ensure you have the following installed:
+   - Java 17 or newer
+   - Gradle (or use the included Gradle wrapper: `./gradlew`)
+   - PostgreSQL running locally or on Docker
+
+2. **Set up the database**  
+   Create a PostgreSQL database (e.g., `ecommerce_store`), and configure your credentials in:
+   `src/main/resources/application.properties`:
+   ```properties
+   spring.datasource.url=jdbc:postgresql://localhost:5432/mydatabase
+   spring.datasource.username=admin
+   spring.datasource.password=admin
+
+   spring.jpa.hibernate.ddl-auto=update
+   spring.jpa.show-sql=true
+
+   From the root of the backend project:
+    ./gradlew bootRun
+
+   Install dependencies
+   npm install
+   npm run dev
+
+   ## Technologies Used
+
+- **Spring Boot**  
+  I chose Spring Boot because I enjoy programming in Java and have been learning it for some time, especially during my summer break. Spring Boot makes it easier to build backend applications quickly and efficiently.
+
+- **React**  
+  I picked React for the frontend since I had little prior experience with frontend development. React seems suitable for beginners and allows building interactive user interfaces with relative ease.
