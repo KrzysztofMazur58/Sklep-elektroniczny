@@ -58,11 +58,11 @@ This project consists of two main parts:
    Install dependencies
    npm install
    npm run dev
-   '''
+   ```
    ## Technologies Used
 
 - **Spring Boot**  
-  I chose Spring Boot because I enjoy programming in Java and have been learning it for some time, especially during my summer break. Spring Boot makes it easier to build backend applications quickly and efficiently.
+  I chose Spring Boot because I enjoy programming in Java and have been learning it for some time, especially during my summer break. Spring Boot makes it easier to build backend applications quickly and    efficiently.
 
 - **React**  
   I picked React for the frontend since I had little prior experience with frontend development. React seems suitable for beginners and allows building interactive user interfaces with relative ease.
