@@ -57,6 +57,9 @@ public class ProductService implements ProductServiceInterface{
         this.messageProducer = messageProducer;
     }
 
+    public void setImageBaseUrl(String imageBaseUrl) {
+        this.imageBaseUrl = imageBaseUrl;
+    }
 
     @Override
     public ProductDTO addProduct(Long categoryId, ProductDTO productDTO) {
