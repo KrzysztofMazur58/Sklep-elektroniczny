@@ -66,3 +66,11 @@ This project consists of two main parts:
 
 - **React**  
   I picked React for the frontend since I had little prior experience with frontend development. React seems suitable for beginners and allows building interactive user interfaces with relative ease.
+
+## ERD:
+![Zrzut ekranu 2025-05-21 172546](https://github.com/user-attachments/assets/6c4d278f-458c-4cee-b850-92b4a80bc417)
+
+
+
+
+
