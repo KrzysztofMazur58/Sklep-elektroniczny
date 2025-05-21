@@ -21,3 +21,5 @@ The system is divided into two separate modules:
 - **Frontend** (React + Redux): Provides a dynamic and user-friendly interface for both customers and admin users.
 
 This project is suitable as a foundation for a production-level e-commerce platform and demonstrates the integration of modern web technologies in a modular, scalable architecture.
+
+![image](https://github.com/user-attachments/assets/48ab2a4e-13e7-4455-a6e9-98775885f411)
