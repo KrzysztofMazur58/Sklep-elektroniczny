@@ -40,8 +40,6 @@ public class ProductControllerTest {
                 .build();
     }
 
-    // -------------------- POST --------------------
-
     @Test
     public void testAddProduct_Success() throws Exception {
         ProductDTO request = new ProductDTO();
@@ -60,8 +58,6 @@ public class ProductControllerTest {
                 .andExpect(jsonPath("$.productId").value(1))
                 .andExpect(jsonPath("$.productName").value("Laptop"));
     }
-
-    // -------------------- GET --------------------
 
     @Test
     public void testGetAllProducts_Success() throws Exception {
@@ -119,8 +115,6 @@ public class ProductControllerTest {
                 .andExpect(jsonPath("$.pageNumber").value(0));
     }
 
-    // -------------------- PUT --------------------
-
     @Test
     public void testUpdateProduct_Success() throws Exception {
         ProductDTO response = new ProductDTO();
@@ -157,8 +151,6 @@ public class ProductControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.productId").value(1));
     }
-
-    // -------------------- DELETE --------------------
 
     @Test
     public void testDeleteProduct_Success() throws Exception {

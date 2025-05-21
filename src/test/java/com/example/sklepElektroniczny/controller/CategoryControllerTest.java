@@ -39,8 +39,6 @@ public class CategoryControllerTest {
                 .build();
     }
 
-    // ----------------- TESTY GET -----------------
-
     @Test
     public void testGetAllCategories_Success() throws Exception {
         CategoryResponse categoryResponse = new CategoryResponse();
@@ -78,8 +76,6 @@ public class CategoryControllerTest {
                 .andExpect(jsonPath("$.status").value(false));
     }
 
-    // ----------------- TESTY POST -----------------
-
     @Test
     public void testCreateCategory_Success() throws Exception {
         CategoryDTO request = new CategoryDTO();
@@ -107,8 +103,6 @@ public class CategoryControllerTest {
                 .andExpect(status().isUnprocessableEntity());
     }
 
-    // ----------------- TESTY PUT -----------------
-
     @Test
     public void testUpdateCategory_Success() throws Exception {
         CategoryDTO request = new CategoryDTO();
@@ -127,8 +121,6 @@ public class CategoryControllerTest {
                 .andExpect(jsonPath("$.categoryId").value(2))
                 .andExpect(jsonPath("$.categoryName").value("Tablety"));
     }
-
-    // ----------------- TESTY DELETE -----------------
 
     @Test
     public void testDeleteCategory_Success() throws Exception {

@@ -84,7 +84,6 @@ public class AuthController {
                 .map(item -> item.getAuthority())
                 .collect(Collectors.toList());
 
-        // Include JWT token in response body
         UserInfoResponse response = new UserInfoResponse(
                 userDetails.getId(),
                 userDetails.getUsername(),

@@ -27,13 +27,13 @@ public class OrderController {
         this.authUtil = authUtil;
     }
 
-    @Operation(summary = "Złóż zamówienie")
+    @Operation(summary = "Zloz zamowienie")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Zamówienie zostało utworzone pomyślnie"),
-            @ApiResponse(responseCode = "400", description = "Nieprawidłowe dane wejściowe")
+            @ApiResponse(responseCode = "201", description = "Zamowienie zostalo utworzone pomyslnie"),
+            @ApiResponse(responseCode = "400", description = "Nieprawidlowe dane wejsciowe")
     })
     @PostMapping("/order/users/payments/{paymentMethod}")
-    public ResponseEntity<OrderDTO> order(@Parameter(description = "Metoda płatności", example = "paypal") @PathVariable String paymentMethod, @RequestBody OrderRequestDTO orderRequestDTO) {
+    public ResponseEntity<OrderDTO> order(@Parameter(description = "Metoda platnosci", example = "paypal") @PathVariable String paymentMethod, @RequestBody OrderRequestDTO orderRequestDTO) {
         String emailId = authUtil.getCurrentUserEmail();
         OrderDTO order = orderService.createOrder(
                 emailId,
@@ -47,22 +47,22 @@ public class OrderController {
         return new ResponseEntity<>(order, HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Pobierz zamówienia aktualnie zalogowanego użytkownika")
+    @Operation(summary = "Pobierz zamowienia aktualnie zalogowanego uzytkownika")
     @GetMapping("/user/orders")
     public ResponseEntity<?> getUserOrders() {
         String emailId = authUtil.getCurrentUserEmail();
         return ResponseEntity.ok(orderService.getOrdersByEmail(emailId));
     }
 
-    @Operation(summary = "Pobierz wszystkie zamówienia (dla administratora)")
+    @Operation(summary = "Pobierz wszystkie zamowienia (dla administratora)")
     @GetMapping("/admin/orders")
     public ResponseEntity<?> getAllOrders() {
         if (!authUtil.isCurrentUserAdmin() && !authUtil.isCurrentUserWorker()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Brak uprawnień");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Brak uprawnien");
         }
-        System.out.println("Użytkownik jest adminem/workiem: " + authUtil.getCurrentUserEmail());
+        System.out.println("Uzytkownik jest adminem/workiem: " + authUtil.getCurrentUserEmail());
         List<OrderDTO> allOrders = orderService.getAllOrders();
-        System.out.println("Ilość zamówień do zwrócenia: " + allOrders.size());
+        System.out.println("Ilosc zamowien do zwrocenia: " + allOrders.size());
         return ResponseEntity.ok(allOrders);
     }
 
@@ -70,7 +70,7 @@ public class OrderController {
     @PutMapping("/admin/orders/{orderId}/status")
     public ResponseEntity<?> updateOrderStatus(@PathVariable Long orderId, @RequestBody StatusUpdateRequest statusUpdateRequest) {
         if (!authUtil.isCurrentUserAdmin()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Brak uprawnień");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Brak uprawnien");
         }
 
         if (statusUpdateRequest.getStatus() == null || statusUpdateRequest.getStatus().isEmpty()) {
@@ -79,12 +79,12 @@ public class OrderController {
 
         try {
             orderService.updateOrderStatus(orderId, statusUpdateRequest.getStatus());
-            return ResponseEntity.ok("Status został zaktualizowany");
+            return ResponseEntity.ok("Status zostal zaktualizowany");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Błąd podczas aktualizacji statusu");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Blad podczas aktualizacji statusu");
         }
     }
 
-
 }
+
 

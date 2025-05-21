@@ -1,6 +1,5 @@
 package com.example.sklepElektroniczny.controller;
 
-
 import com.example.sklepElektroniczny.dtos.CartDTO;
 import com.example.sklepElektroniczny.entity.Cart;
 import com.example.sklepElektroniczny.repository.CartRepository;
@@ -10,7 +9,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,13 +21,12 @@ public class CartController {
 
     private final CartService cartService;
     private final CartRepository cartRepository;
+    private final AuthUtil authUtil;
 
-    @Autowired
-    private AuthUtil authUtil;
-
-    public CartController(CartService cartService, CartRepository cartRepository) {
+    public CartController(CartService cartService, CartRepository cartRepository, AuthUtil authUtil) {
         this.cartService = cartService;
         this.cartRepository = cartRepository;
+        this.authUtil = authUtil;
     }
 
     @Operation(summary = "Dodaj produkt do koszyka")
@@ -51,7 +48,7 @@ public class CartController {
     @GetMapping("/carts")
     public ResponseEntity<List<CartDTO>> getCarts() {
         List<CartDTO> cartDTOs = cartService.getAllCarts();
-        return new ResponseEntity<List<CartDTO>>(cartDTOs, HttpStatus.FOUND);
+        return new ResponseEntity<>(cartDTOs, HttpStatus.FOUND);
     }
 
     @Operation(summary = "Pobierz koszyk aktualnie zalogowanego użytkownika")
@@ -60,13 +57,12 @@ public class CartController {
             @ApiResponse(responseCode = "404", description = "Koszyk nie znaleziony")
     })
     @GetMapping("/carts/users/cart")
-    public ResponseEntity<CartDTO> getCartById(){
+    public ResponseEntity<CartDTO> getCartById() {
         String emailId = authUtil.getCurrentUserEmail();
-        System.out.println("Fetching cart for user: " + emailId);
         Cart cart = cartRepository.findCartByEmail(emailId);
         Long cartId = cart.getCartId();
         CartDTO cartDTO = cartService.getCart(emailId, cartId);
-        return new ResponseEntity<CartDTO>(cartDTO, HttpStatus.OK);
+        return new ResponseEntity<>(cartDTO, HttpStatus.OK);
     }
 
     @Operation(summary = "Aktualizuj ilość produktu w koszyku")
@@ -77,11 +73,11 @@ public class CartController {
     @PutMapping("/cart/products/{productId}/quantity/{operation}")
     public ResponseEntity<CartDTO> updateCartProduct(@Parameter(description = "ID produktu", example = "1") @PathVariable Long productId,
                                                      @Parameter(description = "Operacja: 'increase' lub 'delete'", example = "increase") @PathVariable String operation) {
-
-        CartDTO cartDTO = cartService.updateProductQuantityInCart(productId,
-                operation.equalsIgnoreCase("delete") ? -1 : 1);
-
-        return new ResponseEntity<CartDTO>(cartDTO, HttpStatus.OK);
+        CartDTO cartDTO = cartService.updateProductQuantityInCart(
+                productId,
+                operation.equalsIgnoreCase("delete") ? -1 : 1
+        );
+        return new ResponseEntity<>(cartDTO, HttpStatus.OK);
     }
 
     @Operation(summary = "Usuń produkt z koszyka")
@@ -93,7 +89,7 @@ public class CartController {
     public ResponseEntity<String> deleteProductFromCart(@Parameter(description = "ID koszyka", example = "1") @PathVariable Long cartId,
                                                         @Parameter(description = "ID produktu", example = "10") @PathVariable Long productId) {
         String status = cartService.deleteProductFromCart(cartId, productId);
-
-        return new ResponseEntity<String>(status, HttpStatus.OK);
+        return new ResponseEntity<>(status, HttpStatus.OK);
     }
 }
+
