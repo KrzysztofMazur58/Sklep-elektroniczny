@@ -58,7 +58,7 @@ This project consists of two main parts:
    Install dependencies
    npm install
    npm run dev
-
+   '''
    ## Technologies Used
 
 - **Spring Boot**  
